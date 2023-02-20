@@ -19,18 +19,23 @@ public class Game : MonoBehaviour
     public GameObject TextWon;
     public GameObject TextLost;
     public GameObject TextPaused;
+
     public Text TextHealth;
+
+    public float timeStart = 30;
+    public Text timerText;
 
     bool isPaused;
     float camDeltaX;
     bool gameOver;
-    
+
     void Awake()
     {
         input = new GameInputSimpleKeyboard();
         AssignPlayer();
         AssignCamera();
         PlayerTrackingMaxX = Goal.transform.position.x - 3.0f;
+        timerText.text = timeStart.ToString();
     }
 
     void AssignPlayer()
@@ -58,19 +63,24 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        if(input.IsPausePressed())
+
+        if (input.IsPausePressed())
             TogglePause();
 
         if(isPaused || gameOver)
             return;
+
+        timeStart = timeStart - Time.deltaTime;
+        timerText.text = "Time: " + Mathf.Round(timeStart).ToString();
 
         TextHealth.text = $"Health: {(int)Player.Health}";
         Player.Move(input.GetMovementDirection(), input.IsJumpPressed(), input.IsCrouchPressed());
         
         if(Player.transform.position.x > Goal.transform.position.x)
             Win();
-        else if(Player.Health < 0)
+        else if(Player.Health < 0 || timeStart <= 0)
             Lose();
+
     }
 
     //Making camera trail the player in LateUpdate because player's new position is ready by then
